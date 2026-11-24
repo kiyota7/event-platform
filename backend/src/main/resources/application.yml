@@ -15,3 +15,10 @@ app:
     expiration-minutes: 1440
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
+  mail:
+    # 未設定ならログ出力のみ(開発用)。本番はSENDGRID_API_KEYを設定
+    sendgrid-api-key: ${SENDGRID_API_KEY:}
+    from: ${MAIL_FROM:noreply@example.com}
+  reminder:
+    hours-before: 24
+    interval-ms: 600000

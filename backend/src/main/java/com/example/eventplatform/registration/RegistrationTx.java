@@ -4,6 +4,8 @@ import com.example.eventplatform.event.Event;
 import com.example.eventplatform.event.EventRepository;
 import com.example.eventplatform.registration.Registration.Status;
 import java.time.Instant;
+import com.example.eventplatform.notification.RegistrationConfirmedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +16,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class RegistrationTx {
     private final EventRepository events;
     private final RegistrationRepository registrations;
+    private final ApplicationEventPublisher publisher;
 
-    public RegistrationTx(EventRepository events, RegistrationRepository registrations) {
-        this.events = events; this.registrations = registrations;
+    public RegistrationTx(EventRepository events, RegistrationRepository registrations, ApplicationEventPublisher publisher) {
+        this.events = events; this.registrations = registrations; this.publisher = publisher;
     }
 
     @Transactional
@@ -35,7 +38,10 @@ public class RegistrationTx {
             r.setStatus(Status.WAITLISTED);
         }
         r.setQueueOrder(registrations.maxQueueOrder(eventId) + 1);
-        return registrations.saveAndFlush(r);
+        r.setReminderSentAt(null);
+        Registration saved = registrations.saveAndFlush(r);
+        if (saved.getStatus() == Status.CONFIRMED) publisher.publishEvent(new RegistrationConfirmedEvent(eventId, userId, false));
+        return saved;
     }
 
     @Transactional
@@ -53,6 +59,7 @@ public class RegistrationTx {
             registrations.findFirstByEventIdAndStatusOrderByQueueOrderAsc(eventId, Status.WAITLISTED).ifPresent(w -> {
                 w.setStatus(Status.CONFIRMED);
                 e.setConfirmedCount(e.getConfirmedCount() + 1);
+                publisher.publishEvent(new RegistrationConfirmedEvent(eventId, w.getUserId(), true));
             });
         }
         return registrations.saveAndFlush(r);
