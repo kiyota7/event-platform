@@ -68,7 +68,7 @@ export default function EventDetail() {
         {user && reg && (<><span className="badge status">{STATUS_LABEL[reg.status]}</span><button className="secondary" disabled={busy} onClick={cancel}>キャンセルする</button></>)}
         {user && !reg && !started && <button disabled={busy} onClick={register}>{full ? 'キャンセル待ちに申し込む' : '参加申込する'}</button>}
         {started && !reg && <span className="muted">受付は終了しました</span>}
-        {isOrganizer && (<><Link to={`/events/${id}/edit`}>編集</Link><button className="danger" onClick={remove}>削除</button></>)}
+        {isOrganizer && (<><Link to={`/events/${id}/edit`}>編集</Link><Link to={`/dashboard/events/${id}`}>参加者・統計</Link><button className="danger" onClick={remove}>削除</button></>)}
       </div>
     </section>
   )

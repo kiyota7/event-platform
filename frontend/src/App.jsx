@@ -1,6 +1,8 @@
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthContext.jsx'
 import CalendarView from './pages/CalendarView.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import DashboardEvent from './pages/DashboardEvent.jsx'
 import EventDetail from './pages/EventDetail.jsx'
 import EventForm from './pages/EventForm.jsx'
 import EventList from './pages/EventList.jsx'
@@ -25,6 +27,7 @@ function Header() {
         {user ? (
           <>
             <Link to="/events/new">イベント作成</Link>
+            <Link to="/dashboard">ダッシュボード</Link>
             <span className="user">{user.displayName}</span>
             <button className="link" onClick={logout}>ログアウト</button>
           </>
@@ -47,6 +50,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<EventList />} />
           <Route path="/calendar" element={<CalendarView />} />
+          <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+          <Route path="/dashboard/events/:id" element={<RequireAuth><DashboardEvent /></RequireAuth>} />
           <Route path="/events/new" element={<RequireAuth><EventForm /></RequireAuth>} />
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/events/:id/edit" element={<RequireAuth><EventForm /></RequireAuth>} />
