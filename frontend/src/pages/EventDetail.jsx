@@ -4,6 +4,7 @@ import { api } from '../api.js'
 import { useAuth } from '../AuthContext.jsx'
 import { browserZone, formatInZone } from '../time.js'
 
+const forbiddenMessage = (e) => (e.status === 403 ? 'このイベントの主催者ではないため操作できません。ログイン中のアカウントを確認してください' : null)
 const STATUS_LABEL = { CONFIRMED: '参加確定', WAITLISTED: 'キャンセル待ち' }
 
 export default function EventDetail() {
@@ -33,7 +34,7 @@ export default function EventDetail() {
   async function act(fn, okErrors = {}) {
     setBusy(true); setError('')
     try { await fn(); await load() }
-    catch (e) { setError(okErrors[e.status] || '操作に失敗しました。時間をおいて再度お試しください') }
+    catch (e) { setError(okErrors[e.status] || forbiddenMessage(e) || '操作に失敗しました。時間をおいて再度お試しください') }
     finally { setBusy(false) }
   }
 
@@ -42,7 +43,8 @@ export default function EventDetail() {
   const cancel = () => window.confirm('申込をキャンセルしますか?') && act(() => api(`/events/${id}/registrations`, { method: 'DELETE' }))
   async function remove() {
     if (!window.confirm('このイベントを削除しますか?(元に戻せません)')) return
-    try { await api(`/events/${id}`, { method: 'DELETE' }); navigate('/') } catch { setError('削除に失敗しました') }
+    try { await api(`/events/${id}`, { method: 'DELETE' }); navigate('/') }
+    catch (e) { setError(forbiddenMessage(e) || '削除に失敗しました') }
   }
 
   if (!event) return error ? <p className="error" role="alert">{error}</p> : <p className="center">読み込み中...</p>
