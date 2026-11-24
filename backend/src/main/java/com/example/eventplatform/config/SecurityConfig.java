@@ -29,6 +29,7 @@ public class SecurityConfig {
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                .requestMatchers("/api/notifications/stream").permitAll() // 認証は使い捨てticketで行う
                 .requestMatchers(HttpMethod.GET, "/api/events/**", "/api/categories/**", "/api/tags/**").permitAll()
                 .requestMatchers("/actuator/health", "/h2-console/**").permitAll()
                 .anyRequest().authenticated())

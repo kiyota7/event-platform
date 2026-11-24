@@ -24,12 +24,14 @@ public class ReminderService {
     private final EventRepository events;
     private final UserRepository users;
     private final MailSender mail;
+    private final NotificationService notifications;
     private final long hoursBefore;
 
     public ReminderService(RegistrationRepository registrations, EventRepository events, UserRepository users,
-                           MailSender mail, @Value("${app.reminder.hours-before}") long hoursBefore) {
+                           MailSender mail, NotificationService notifications,
+                           @Value("${app.reminder.hours-before}") long hoursBefore) {
         this.registrations = registrations; this.events = events; this.users = users;
-        this.mail = mail; this.hoursBefore = hoursBefore;
+        this.mail = mail; this.notifications = notifications; this.hoursBefore = hoursBefore;
     }
 
     @Scheduled(initialDelay = 60_000, fixedDelayString = "${app.reminder.interval-ms}")
@@ -47,6 +49,7 @@ public class ReminderService {
                 if (e == null || u == null) continue;
                 mail.send(u.getEmail(), "【リマインダー】まもなく開催: " + e.getTitle(),
                         u.getDisplayName() + " さん\n\n参加予定のイベントがまもなく始まります。\n\n" + MailNotificationListener.describe(e, u));
+                notifications.create(u.getId(), Notification.Type.REMINDER, "まもなく開催: " + e.getTitle(), e.getId());
                 r.setReminderSentAt(now);
                 sent++;
             } catch (RuntimeException ex) {
