@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
+    java.util.List<Event> findByOrganizerIdOrderByStartAtDesc(Long organizerId);
 
     /** 申込・キャンセルのたびにversionを必ず進め、同時更新を楽観的ロックで検出する */
     @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)

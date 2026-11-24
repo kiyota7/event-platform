@@ -21,6 +21,8 @@ public class Registration {
     private long queueOrder;
     @Column(nullable = false)
     private Instant updatedAt = Instant.now();
+    /** 初回申込日時(推移統計用。再申込でも変えない) */
+    private Instant createdAt = Instant.now();
     /** リマインダー送信済み日時(未送信はnull) */
     private Instant reminderSentAt;
 
@@ -35,6 +37,7 @@ public class Registration {
     public Instant getUpdatedAt() { return updatedAt; }
     public void setStatus(Status s) { status = s; updatedAt = Instant.now(); }
     public void setQueueOrder(long q) { queueOrder = q; }
+    public Instant getCreatedAt() { return createdAt; }
     public Instant getReminderSentAt() { return reminderSentAt; }
     public void setReminderSentAt(Instant t) { reminderSentAt = t; }
 }
