@@ -53,7 +53,9 @@ public class EventService {
     public EventResponse get(Long id) { return toResponse(find(id)); }
 
     @Transactional(readOnly = true)
-    public Page<EventResponse> list(Pageable p) { return events.findAllByOrderByStartAtAsc(p).map(this::toResponse); }
+    public Page<EventResponse> search(EventSearchCriteria c, Pageable p) {
+        return events.findAll(EventSpecifications.from(c), p).map(this::toResponse);
+    }
 
     private Event find(Long id) {
         return events.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "event not found"));
