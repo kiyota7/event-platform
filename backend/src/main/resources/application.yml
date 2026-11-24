@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 spring:
   datasource:
     url: ${DATABASE_URL:jdbc:h2:mem:eventdb;DB_CLOSE_DELAY=-1}
@@ -22,3 +22,8 @@ app:
   reminder:
     hours-before: 24
     interval-ms: 600000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

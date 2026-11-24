@@ -1,0 +1,50 @@
+# Render Blueprint: PostgreSQL + Spring Boot(Docker) + React(静的サイト)
+databases:
+  - name: event-platform-db
+    plan: free
+    databaseName: eventplatform
+    user: eventplatform
+
+services:
+  - type: web
+    name: event-platform-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_HOST
+        fromDatabase: { name: event-platform-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: event-platform-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: event-platform-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: event-platform-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: event-platform-db, property: password }
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGIN
+        sync: false   # フロントのURL(例: https://event-platform-web.onrender.com)
+      - key: SENDGRID_API_KEY
+        sync: false   # 未設定ならメールはログ出力のみ
+      - key: MAIL_FROM
+        sync: false   # SendGridで認証済みの送信元アドレス
+
+  - type: web
+    name: event-platform-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      # /apiはバックエンドへ中継(同一オリジンになりCORS不要)。バックエンドのURLが違う場合は書き換える
+      - type: rewrite
+        source: /api/*
+        destination: https://event-platform-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
