@@ -44,7 +44,7 @@ services:
       # /apiはバックエンドへ中継(同一オリジンになりCORS不要)。バックエンドのURLが違う場合は書き換える
       - type: rewrite
         source: /api/*
-        destination: https://event-platform-api.onrender.com/api/*
+        destination: https://event-platform-api-s0kk.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
