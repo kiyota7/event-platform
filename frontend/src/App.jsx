@@ -1,5 +1,7 @@
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthContext.jsx'
+import NotificationBell from './NotificationBell.jsx'
+import { browserZone } from './time.js'
 import CalendarView from './pages/CalendarView.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import DashboardEvent from './pages/DashboardEvent.jsx'
@@ -28,6 +30,7 @@ function Header() {
           <>
             <Link to="/events/new">イベント作成</Link>
             <Link to="/dashboard">ダッシュボード</Link>
+            <NotificationBell key={user.id} zone={user.timeZone || browserZone} />
             <span className="user">{user.displayName}</span>
             <button className="link" onClick={logout}>ログアウト</button>
           </>
