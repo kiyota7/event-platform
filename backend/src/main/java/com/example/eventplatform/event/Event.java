@@ -28,6 +28,9 @@ public class Event {
     /** 申込の楽観的ロック用(#3で利用) */
     @Version
     private long version;
+    /** 確定済み参加者数(定員管理。version更新と同一トランザクションで更新) */
+    @Column(nullable = false)
+    private int confirmedCount = 0;
     @ManyToOne
     private Category category;
     @ManyToMany
@@ -55,6 +58,8 @@ public class Event {
     public int getCapacity() { return capacity; }
     public void setCapacity(int v) { capacity = v; }
     public long getVersion() { return version; }
+    public int getConfirmedCount() { return confirmedCount; }
+    public void setConfirmedCount(int v) { confirmedCount = v; }
     public Category getCategory() { return category; }
     public void setCategory(Category c) { category = c; }
     public Set<Tag> getTags() { return tags; }

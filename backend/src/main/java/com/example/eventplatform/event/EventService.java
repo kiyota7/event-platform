@@ -1,6 +1,7 @@
 package com.example.eventplatform.event;
 
 import com.example.eventplatform.event.EventDtos.*;
+import com.example.eventplatform.registration.RegistrationRepository;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.HashSet;
@@ -18,9 +19,11 @@ public class EventService {
     private final EventRepository events;
     private final CategoryRepository categories;
     private final TagRepository tags;
+    private final RegistrationRepository registrations;
 
-    public EventService(EventRepository events, CategoryRepository categories, TagRepository tags) {
-        this.events = events; this.categories = categories; this.tags = tags;
+    public EventService(EventRepository events, CategoryRepository categories, TagRepository tags,
+                        RegistrationRepository registrations) {
+        this.events = events; this.categories = categories; this.tags = tags; this.registrations = registrations;
     }
 
     @Transactional
@@ -42,6 +45,7 @@ public class EventService {
     public void delete(Long userId, Long id) {
         Event e = find(id);
         requireOrganizer(e, userId);
+        registrations.deleteByEventId(id);
         events.delete(e);
     }
 
@@ -63,6 +67,8 @@ public class EventService {
         try { ZoneId.of(r.timeZone()); }
         catch (DateTimeException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid timeZone"); }
         if (!r.endAt().isAfter(r.startAt())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endAt must be after startAt");
+        if (r.capacity() < e.getConfirmedCount())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "capacity is below confirmed registrations");
         e.setTitle(r.title()); e.setDescription(r.description()); e.setLocation(r.location());
         e.setStartAt(r.startAt().toInstant()); e.setEndAt(r.endAt().toInstant());
         e.setTimeZone(r.timeZone()); e.setCapacity(r.capacity());
@@ -83,6 +89,6 @@ public class EventService {
         return new EventResponse(e.getId(), e.getOrganizerId(), e.getTitle(), e.getDescription(), e.getLocation(),
                 e.getStartAt(), e.getEndAt(), e.getTimeZone(),
                 e.getStartAt().atZone(zone).toOffsetDateTime(), e.getEndAt().atZone(zone).toOffsetDateTime(),
-                e.getCapacity(), c == null ? null : c.getId(), c == null ? null : c.getName(), tagNames);
+                e.getCapacity(), e.getConfirmedCount(), c == null ? null : c.getId(), c == null ? null : c.getName(), tagNames);
     }
 }

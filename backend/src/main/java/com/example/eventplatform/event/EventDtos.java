@@ -23,7 +23,7 @@ public final class EventDtos {
             Long id, Long organizerId, String title, String description, String location,
             java.time.Instant startAt, java.time.Instant endAt, String timeZone,
             OffsetDateTime startLocal, OffsetDateTime endLocal,
-            int capacity, Long categoryId, String categoryName, List<String> tags) {}
+            int capacity, int confirmedCount, Long categoryId, String categoryName, List<String> tags) {}
 
     public record CategoryRequest(@NotBlank @Size(max = 50) String name) {}
     public record NameResponse(Long id, String name) {}
