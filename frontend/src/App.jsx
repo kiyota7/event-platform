@@ -1,6 +1,9 @@
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthContext.jsx'
-import Home from './pages/Home.jsx'
+import CalendarView from './pages/CalendarView.jsx'
+import EventDetail from './pages/EventDetail.jsx'
+import EventForm from './pages/EventForm.jsx'
+import EventList from './pages/EventList.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 
@@ -17,8 +20,11 @@ function Header() {
     <header className="header">
       <Link to="/" className="brand">Event Platform</Link>
       <nav>
+        <Link to="/">イベント</Link>
+        <Link to="/calendar">カレンダー</Link>
         {user ? (
           <>
+            <Link to="/events/new">イベント作成</Link>
             <span className="user">{user.displayName}</span>
             <button className="link" onClick={logout}>ログアウト</button>
           </>
@@ -39,10 +45,13 @@ export default function App() {
       <Header />
       <main className="main">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<EventList />} />
+          <Route path="/calendar" element={<CalendarView />} />
+          <Route path="/events/new" element={<RequireAuth><EventForm /></RequireAuth>} />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/events/:id/edit" element={<RequireAuth><EventForm /></RequireAuth>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/me" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

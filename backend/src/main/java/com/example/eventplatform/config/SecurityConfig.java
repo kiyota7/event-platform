@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                 .requestMatchers("/api/notifications/stream").permitAll() // 認証は使い捨てticketで行う
                 .requestMatchers(HttpMethod.GET, "/api/events/**", "/api/categories/**", "/api/tags/**").permitAll()
+                // エラー応答は/errorへ転送される。許可しないと404/409等が401に化ける
+                .requestMatchers("/error").permitAll()
                 .requestMatchers("/actuator/health", "/h2-console/**").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
