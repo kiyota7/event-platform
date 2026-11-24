@@ -2,6 +2,12 @@
 
 勉強会・セミナーの作成と参加管理ができるイベント管理・予約プラットフォーム。
 
+## 公開URL(Render)
+- アプリ: https://event-platform-web-g55k.onrender.com
+- APIヘルスチェック: https://event-platform-api-s0kk.onrender.com/actuator/health
+
+> 無料枠のため、しばらくアクセスがないとサーバーがスリープします。初回の表示に1分ほどかかることがあります。
+
 ## 技術スタック
 - Backend: Spring Boot 3 (Java 21) / Spring Security + JWT / Spring Data JPA / PostgreSQL
 - Frontend: React + Vite (ポート5173)
