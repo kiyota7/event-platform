@@ -16,4 +16,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     @Query("select coalesce(max(r.queueOrder), 0) from Registration r where r.eventId = :eventId")
     long maxQueueOrder(@Param("eventId") Long eventId);
+
+    /** 開始がnow〜limitの範囲で、リマインダー未送信の確定済み申込 */
+    @Query("select r from Registration r, Event e where r.eventId = e.id and r.status = 'CONFIRMED' "
+            + "and r.reminderSentAt is null and e.startAt > :now and e.startAt <= :limit order by r.id")
+    List<Registration> findDueForReminder(@Param("now") java.time.Instant now, @Param("limit") java.time.Instant limit);
 }
