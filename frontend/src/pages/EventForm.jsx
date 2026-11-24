@@ -50,7 +50,8 @@ export default function EventForm() {
       const saved = await api(editing ? `/events/${id}` : '/events', { method: editing ? 'PUT' : 'POST', body })
       navigate(`/events/${saved.id}`)
     } catch (err) {
-      setError(err.status === 400 ? '入力内容を確認してください(定員は確定済み人数以上にしてください)' : '保存に失敗しました')
+      setError(err.status === 403 ? 'このイベントの主催者ではないため保存できません。ログイン中のアカウントを確認してください'
+        : err.status === 400 ? '入力内容を確認してください(定員は確定済み人数以上にしてください)' : '保存に失敗しました')
     } finally { setBusy(false) }
   }
 

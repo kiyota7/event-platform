@@ -22,6 +22,17 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('auth:unauthorized', onUnauthorized)
   }, [])
 
+  // 他のタブでログイン/ログアウトされたら表示を同期する(storageイベントは他タブの変更だけ通知される)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== null && e.key !== 'token') return // key===nullはstorage全消去
+      if (!tokenStore.get()) { setUser(null); return }
+      api('/auth/me').then(setUser).catch(() => setUser(null))
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   const handleAuth = useCallback((res) => {
     tokenStore.set(res.token)
     setUser(res.user)
