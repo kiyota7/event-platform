@@ -4,8 +4,14 @@ import { api } from './api.js'
 import { formatInZone } from './time.js'
 
 const MAX_BACKOFF_MS = 30000
+/** SSEがつながっていない間に、通知を取り直す間隔 */
+const POLL_MS = 30000
 
-/** ヘッダーの通知ベル。SSEで新着を受信し、切断時は再接続する */
+/**
+ * ヘッダーの通知ベル。SSEで新着を受信し、切断時は再接続する。
+ * 本番(Render)では、静的サイトの中継がSSEを流さず、接続が開かないことがある。
+ * そのため、SSEがつながっていない間は、一定間隔で通知を取り直して補う。
+ */
 export default function NotificationBell({ zone }) {
   const navigate = useNavigate()
   const [items, setItems] = useState([])
@@ -54,6 +60,15 @@ export default function NotificationBell({ zone }) {
     return () => { cancelled = true; clearTimeout(timer); es?.close() }
   }, [reload])
 
+  // SSEがつながっていない間は、定期的に取り直す(つながっているときは、リアルタイムで届く)
+  useEffect(() => {
+    if (live) return undefined
+    const id = setInterval(reload, POLL_MS)
+    const onVisible = () => { if (document.visibilityState === 'visible') reload() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible) }
+  }, [live, reload])
+
   useEffect(() => {
     const onDoc = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', onDoc)
@@ -78,14 +93,14 @@ export default function NotificationBell({ zone }) {
 
   return (
     <div className="bell" ref={box}>
-      <button className="bell-btn" onClick={() => setOpen(!open)} aria-label={`通知 未読${unread}件`} aria-expanded={open}>
+      <button className="bell-btn" onClick={() => { if (!open) reload(); setOpen(!open) }} aria-label={`通知 未読${unread}件`} aria-expanded={open}>
         🔔{unread > 0 && <span className="bell-badge">{unread > 99 ? '99+' : unread}</span>}
       </button>
       {open && (
         <div className="bell-panel" role="dialog" aria-label="通知">
           <div className="bell-head">
             <strong>通知</strong>
-            <span className="muted">{live ? '● リアルタイム' : '○ 再接続中'}</span>
+            <span className="muted">{live ? '● リアルタイム' : '○ 30秒ごとに更新'}</span>
             <button className="link" onClick={readAll} disabled={unread === 0}>すべて既読</button>
           </div>
           {items.length === 0 ? <p className="muted pad">通知はありません。</p> : (
